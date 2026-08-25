@@ -1,0 +1,127 @@
+/* ── Fonts ───────────────────────────────────────────────────────────────
+   Self-hosted via @fontsource (not a Google Fonts <link>) so the app has
+   no third-party runtime dependency and fonts are versioned with the repo.
+   Bebas Neue ships one weight by design (it's already a heavy condensed
+   face); Inter and JetBrains Mono get a small, deliberate weight range. */
+@import "@fontsource/bebas-neue/latin-400.css";
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
+@import "@fontsource/jetbrains-mono/latin-700.css";
+
+@import "tailwindcss";
+
+/* ── Design tokens ──────────────────────────────────────────────────────
+   Source palette (stage-black, spotlight-violet, marquee-magenta,
+   marquee-amber, confirmed-green, stub-paper) is the brief's own —
+   those six exact hexes are fixed. Every other token below is DERIVED
+   from them and exists for a specific, checked reason (see comments).
+   Contrast ratios were computed against WCAG 2.1 AA (4.5:1 normal text,
+   3:1 large text / UI components) — not eyeballed. */
+@theme {
+  /* Base + elevation. Dark UIs need more than one flat black or every
+     card/modal/nav visually merges into the page — "surface" and
+     "surface-hover" are stage-black lifted ~10–16% toward
+     spotlight-violet (kept on-hue, not neutral gray, per the brief's
+     "violet-tinted, not flat near-black" direction). */
+  --color-stage-black: #14111f;
+  --color-surface: #1d1732;
+  --color-surface-hover: #221a3e;
+  --color-border: #271e49;
+
+  /* Text on dark surfaces. "ink" is a warm near-white (16.5:1 on
+     stage-black) — echoes stub-paper's warmth at a whisper, ties the
+     dark UI and the light ticket stub to the same palette. ink-muted
+     is tuned to clear 4.5:1 against BOTH stage-black and surface, so
+     secondary text stays readable regardless of which one it sits on.
+     ink-faint drops below AA on purpose — it's for disabled controls
+     only (WCAG-exempt), never for text anyone needs to read. */
+  --color-ink: #f5f1ea;
+  --color-ink-muted: #8e8d93;
+  --color-ink-faint: #514c63;
+
+  /* Brand. spotlight-violet is the brief's exact hex — used for fills,
+     borders, icons, and large/bold text (3.3:1, passes the 3:1 AA
+     threshold for large text). Raw spotlight-violet fails AA for
+     body-sized text (3.3 < 4.5), so spotlight-violet-bright is a +20%
+     white-mixed tint (4.9:1) used specifically for inline links and
+     small text on dark backgrounds — same hue, safe to read. */
+  --color-spotlight-violet: #6c4ce0;
+  --color-spotlight-violet-bright: #8970e6;
+
+  /* Semantic state accents. All three clear 5:1+ against stage-black.
+     Text/icons placed ON a filled magenta/amber/green/red surface
+     should be stage-black, not white — white-on-magenta is only
+     3.3:1, but stage-black-on-magenta is 5.6:1 (same for amber/green/
+     red, all 5.7–10.2:1). The Badge/Button primitives encode this so
+     no component has to work it out by hand. */
+  --color-marquee-magenta: #ff3d8a;
+  --color-marquee-amber: #ffb020;
+  --color-marquee-red: #ff5c5c;
+  --color-confirmed-green: #34d399;
+
+  /* Ticket-stub surface — the brief's exact "warm off-white, not pure
+     white" paper tone, plus a matching muted ink for secondary text
+     printed on it (5.6:1 against stub-paper). */
+  --color-stub-paper: #fbf7ef;
+  --color-stub-paper-muted: #656268;
+
+  /* Type. Display is used sparingly — event titles, section headers,
+     the countdown digits — never body copy. */
+  --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Motion. One shared easing + duration vocabulary so every
+     transition in the app feels like it belongs to the same system
+     instead of each component inventing its own timing. */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-stage-black text-ink font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    background-color: var(--color-spotlight-violet);
+    color: var(--color-ink);
+  }
+}
+
+/* ── Shared utilities ────────────────────────────────────────────────
+   Small, deliberately reused effects — not a general-purpose utility
+   dump. Kept to just the one every interactive element needs. */
+@utility focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  &:focus-visible {
+    outline: 2px solid var(--color-spotlight-violet-bright);
+    outline-offset: 2px;
+  }
+}
+
+/* Respect prefers-reduced-motion globally: anything using Tailwind's
+   transition/animate utilities gets throttled to near-instant rather
+   than every component re-implementing its own check. Framer Motion
+   components use the useReducedMotion hook instead (see lib/motion.ts). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
